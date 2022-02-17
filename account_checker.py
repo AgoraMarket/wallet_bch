@@ -1,11 +1,10 @@
 
 from app import db
-
-from app.models import \
-    BchWallet, \
-    User, \
-    BchWalletAddresses,\
-    BchUnconfirmed
+from app.classes.auth import Auth_User
+from app.classes.wallet_bch import \
+    Bch_Wallet, \
+    Bch_WalletAddresses,\
+    Bch_WalletUnconfirmed
 
 
 def accounts_no_address_fix():
@@ -15,9 +14,9 @@ def accounts_no_address_fix():
 
     :return:
     """
-    getusers = db.session.query(User).all()
+    getusers = db.session.query(Auth_User).all()
     for f in getusers:
-        userswallet = db.session.query(BchWallet).filter(f.id == BchWallet.user_id).first()
+        userswallet = db.session.query(Bch_Wallet).filter(f.id == Bch_Wallet.user_id).first()
         if userswallet:
             if userswallet.address1.startswith('bitcoincash'):
                 pass
@@ -37,9 +36,10 @@ def bch_get_address(userswallet):
     :return:
     """
     # get the user an unused address
-    print("user id has no address: ", userswallet.user_id)
+
+    print(f"user id has no address: {userswallet.user_id}")
     # sets users wallet with this address
-    getnewaddress = db.session.query(BchWalletAddresses).filter(BchWalletAddresses.status == 0).first()
+    getnewaddress = db.session.query(Bch_WalletAddresses).filter(Bch_WalletAddresses.status == 0).first()
     userswallet.address1 = getnewaddress.bchaddress
     userswallet.address1status = 1
     # update address in listing as used
@@ -48,8 +48,8 @@ def bch_get_address(userswallet):
     db.session.add(userswallet)
     db.session.add(getnewaddress)
 
-    print("adding an address to the wallet", getnewaddress.bchaddress)
 
+    print(f"adding an address to the wallet {getnewaddress.bchaddress}")
 
 def bch_create_wallet(user_id):
     """
@@ -57,14 +57,15 @@ def bch_create_wallet(user_id):
     :param user_id:
     :return:
     """
-    getnewaddress = db.session.query(BchWalletAddresses).filter(BchWalletAddresses.status == 0).first()
+    getnewaddress = db.session.query(Bch_WalletAddresses).filter(Bch_WalletAddresses.status == 0).first()
 
     # if user has no wallet in database
     # create it and give it an address
-    print("user id has no address OR WALLET..failure somewhere!: ", user_id)
+
+    print(f"user id has no address OR WALLET..failure somewhere! {user_id}")
     print("fixing problem")
     # create a new wallet
-    btc_cash_walletcreate = BchWallet(user_id=user_id,
+    btc_cash_walletcreate = Bch_Wallet(user_id=user_id,
                                       currentbalance=0,
                                       unconfirmed=0,
                                       address1=getnewaddress.bchaddress,
@@ -77,7 +78,7 @@ def bch_create_wallet(user_id):
                                       transactioncount=0
                                       )
     # add an unconfirmed
-    btc_cash_newunconfirmed = BchUnconfirmed(
+    btc_cash_newunconfirmed = Bch_WalletUnconfirmed(
         user_id=user_id,
         unconfirmed1=0,
         unconfirmed2=0,
@@ -96,8 +97,8 @@ def bch_create_wallet(user_id):
     db.session.add(btc_cash_walletcreate)
     db.session.add(btc_cash_newunconfirmed)
 
-    print("created wallet:", getnewaddress.bchaddress)
 
+    print(f"created wallet: {getnewaddress.bchaddress}")
 
 if __name__ == '__main__':
     accounts_no_address_fix()

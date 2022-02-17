@@ -1,10 +1,6 @@
 
 from app import db
-
-from app.models import \
-    BchWallet, \
-    TransactionsBch, \
-    BchWalletAddresses
+from app.classes.wallet_bch import Bch_Wallet, Bch_WalletTransactions, Bch_WalletAddresses
 
 
 def getnewaddress(user_id):
@@ -13,18 +9,18 @@ def getnewaddress(user_id):
     :param user_id:
     :return:
     """
-    userswallet = db.session.query(BchWallet) \
+    userswallet = db.session.query(Bch_Wallet) \
         .filter_by(user_id=user_id) \
         .first()
-    x = db.session.query(BchWalletAddresses) \
-        .filter(BchWalletAddresses.status == 0) \
+    x = db.session.query(Bch_WalletAddresses) \
+        .filter(Bch_WalletAddresses.status == 0) \
         .first()
 
-    # Test to see if user doesnt have any current incomming transactions..get new one if not
-    incdeposit = db.session.query(TransactionsBch) \
-        .filter(TransactionsBch.category == 3,
-                TransactionsBch.confirmed == 0,
-                TransactionsBch.user_id == user_id,
+    # Test to see if user doesn't have any current incomming transactions..get new one if not
+    incdeposit = db.session.query(Bch_WalletTransactions) \
+        .filter(Bch_WalletTransactions.category == 3,
+                Bch_WalletTransactions.confirmed == 0,
+                Bch_WalletTransactions.user_id == user_id,
                 ) \
         .first()
     if incdeposit is None:

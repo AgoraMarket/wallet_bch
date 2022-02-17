@@ -1,12 +1,11 @@
 from app import db
-from app.models import Notifications
+from app.classes.message import Message_Notifications
 import datetime
 
 
 def notification(thetypeofnote, user_id):
     now = datetime.datetime.utcnow()
-    addnotice = Notifications(
-
+    addnotice = Message_Notifications(
                             created=now,
                             read=0,
                             user_id=user_id,
@@ -19,4 +18,3 @@ def notification(thetypeofnote, user_id):
 
                              )
     db.session.add(addnotice)
-    db.session.commit()

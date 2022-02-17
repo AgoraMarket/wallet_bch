@@ -1,19 +1,10 @@
 
-
-![alt text](https://www.tipvote.com/images/social_logo_dark.png)
-
-
- 	
-Tipvote.com is a social media site powered by the blockchain.  We enable ways to support content through CryptoCurrency.
+ClearnetMarket.com is an ecommerce site powered by the blockchain.  We enable ways to support the exchange of goods through CryptoCurrency.
  	
  	
 ## Overview
-This app utilizes Bitcoin RPC and JSON to data to monitor Bitcoin Cash Wallet Transactions.  
+This app utilizes Bitcoin Cash RPC and JSON to data to monitor Monero Wallet Transactions.  
 
 
 ## Contributing
-
 We are actively looking for members to make this site better.
-
-## License
-https://github.com/tipvote/tipvote_webapp/blob/master/license.txt

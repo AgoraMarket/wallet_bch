@@ -11,11 +11,11 @@ from walletconfig import url, digital_currency
 from app.common.functions import floating_decimals
 from app.notification import notification
 
-from app.models import \
-    BchWallet, \
-    BchUnconfirmed, \
-    BchTransOrphan, \
-    TransactionsBch
+from app.classes.wallet_bch import \
+    Bch_Wallet, \
+    Bch_WalletUnconfirmed, \
+    Bch_WalletTransferOrphan, \
+    Bch_WalletTransactions
 
 
 # this script nonstop.
@@ -33,7 +33,7 @@ def addtounconfirmed(amount, user_id, txid):
     """
 
     # get unconfirmed transactions
-    unconfirmedtable = db.session.query(BchUnconfirmed)\
+    unconfirmedtable = db.session.query(Bch_WalletUnconfirmed)\
         .filter_by(user_id=user_id)\
         .first()
 
@@ -43,7 +43,7 @@ def addtounconfirmed(amount, user_id, txid):
     # if doesnt exist, create a new unconfirmed tranactions
     if unconfirmedtable is None:
 
-        newunconfirmed = BchUnconfirmed(
+        newunconfirmed = Bch_WalletUnconfirmed(
             user_id=user_id,
             unconfirmed1=0,
             unconfirmed2=0,
@@ -79,7 +79,6 @@ def addtounconfirmed(amount, user_id, txid):
             unconfirmedtable.unconfirmed5 = decamount
             unconfirmedtable.txid5 = txid
             db.session.add(unconfirmedtable)
-
         else:
             pass
 
@@ -91,7 +90,8 @@ def removeunconfirmed(user_id, txid):
     """
 
     # get unconfirmed in database
-    unconfirmeddelete = db.session.query(BchUnconfirmed)\
+    unconfirmeddelete = db.session\
+        .query(Bch_WalletUnconfirmed)\
         .filter_by(user_id=user_id)\
         .first()
 
@@ -129,7 +129,7 @@ def getbalanceunconfirmed(user_id):
     """
     this function removes the amount from unconfirmed
     """
-    unconfirmeddelete = db.session.query(BchUnconfirmed)\
+    unconfirmeddelete = db.session.query(Bch_WalletUnconfirmed)\
         .filter_by(user_id=user_id)\
         .first()
     a = Decimal(unconfirmeddelete.unconfirmed1)
@@ -140,9 +140,10 @@ def getbalanceunconfirmed(user_id):
 
     total = a + b + c + d + e
 
-    wallet = db.session.query(BchWallet)\
+    wallet = db.session.query(Bch_Wallet)\
         .filter_by(user_id=user_id)\
         .first()
+        
     totalchopped = floating_decimals(total, 8)
     wallet.unconfirmed = totalchopped
     db.session.add(wallet)
@@ -152,7 +153,7 @@ def orphan(txid, amount2, address):
     """
     this function is if they cant find a matching address
     """
-    getorphan = db.session.query(BchTransOrphan)\
+    getorphan = db.session.query(Bch_WalletTransferOrphan)\
         .filter_by(txid=txid)\
         .first()
     if getorphan:
@@ -160,7 +161,7 @@ def orphan(txid, amount2, address):
     else:
         # orphan transaction..put in background.
         # they prolly sent to old address
-        trans = BchTransOrphan(
+        trans = Bch_WalletTransferOrphan(
             bch=amount2,
             bchaddress=address,
             txid=txid,
@@ -180,7 +181,7 @@ def newincomming(userwallet, amount2, txid, howmanyconfs):
     shortaddcurrent = floating_decimals(addcurrent, 8)
 
     # create and watch transaction
-    trans = TransactionsBch(
+    trans = Bch_WalletTransactions(
         category=3,
         user_id=userwallet.user_id,
         confirmations=howmanyconfs,
@@ -235,7 +236,7 @@ def updateincomming(howmanyconfs, transactions, userwallet, txid, amount2):
 
             # get total unconfirmed balance
             getbalanceunconfirmed(userwallet.user_id)
-
+   
         elif 6 <= howmanyconfs <= 25:
 
             # remove from unconfirmed
@@ -313,10 +314,10 @@ def addcoin():
         howmanyconfs = int(confirmations)
 
         # find the wallet that matches the address
-        userwallets = db.session.query(BchWallet) \
-            .filter(or_(BchWallet.address1 == address,
-                        BchWallet.address2 == address,
-                        BchWallet.address3 == address
+        userwallets = db.session.query(Bch_Wallet) \
+            .filter(or_(Bch_Wallet.address1 == address,
+                        Bch_Wallet.address2 == address,
+                        Bch_Wallet.address3 == address
                         )
                     ) \
             .first()
@@ -325,8 +326,8 @@ def addcoin():
         if userwallets:
 
             # get the transactions
-            transactions = db.session.query(TransactionsBch)\
-                .filter(TransactionsBch.txid == txid)\
+            transactions = db.session.query(Bch_WalletTransactions)\
+                .filter(Bch_WalletTransactions.txid == txid)\
                 .first()
 
             # create in database a new transaction or watch it

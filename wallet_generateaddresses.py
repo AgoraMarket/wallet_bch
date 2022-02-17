@@ -4,22 +4,21 @@ import requests
 import json
 from walletconfig import url
 
-from app.models import BchWalletAddresses
-
+from app.classes.wallet_bch import Bch_WalletAddresses
 
 def generate_addresses():
 
     # query amount addresses that are not uses
-    get_available_addresses = db.session.query(BchWalletAddresses)\
-        .filter(BchWalletAddresses.status == 0)\
+    get_available_addresses = db.session.query(Bch_WalletAddresses)\
+        .filter(Bch_WalletAddresses.status == 0)\
         .count()
 
     # see if less than 50
     if get_available_addresses <= 50:
 
         # make a 100 new addresses
-        for f in range(100):
-
+        for f in range(10):
+           
             # call the rpc
             newwalletaddress = callforaddress()
 
@@ -30,9 +29,10 @@ def generate_addresses():
                 the_address = newwalletaddress["result"]
 
                 # add to db addresses
-                walletadd = BchWalletAddresses(
+                walletadd = Bch_WalletAddresses(
                     bchaddress=the_address,
                     status=0,
+                    shard=1,
                      )
 
                 db.session.add(walletadd)

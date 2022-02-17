@@ -1,12 +1,11 @@
 from app import db
 from decimal import Decimal
 
-from app.models import BchWallet
+from app.classes.wallet_bch import Bch_Wallet
 
-
-def checkbalance(user_id, amount):
-    userwallet = db.session.query(BchWallet)\
-        .filter(BchWallet.user_id == user_id)\
+def bch_check_balance(user_id, amount):
+    userwallet = db.session.query(Bch_Wallet)\
+        .filter(Bch_Wallet.user_id == user_id)\
         .first()
     curbal = Decimal(userwallet.currentbalance) + Decimal(amount)
     amounttocheck = Decimal(amount)

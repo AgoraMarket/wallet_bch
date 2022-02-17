@@ -14,12 +14,7 @@ from app.notification import \
 from app.common.functions import \
     floating_decimals
 
-from app.models import \
-    BchWallet, \
-    TransactionsBch, \
-    BchWalletFee, \
-    BchWalletWork
-
+from app.classes.wallet_bch import Bch_Wallet, Bch_WalletTransactions, Bch_WalletFee, Bch_WalletWork
 
 def sendnotification(user_id, notetype):
     """
@@ -31,13 +26,11 @@ def sendnotification(user_id, notetype):
     # 100 =  too litte or too much at withdrawl
     # 102 = wallet error
     # 103 = btc address error
-
     # btc address error
     notification(
         thetypeofnote=notetype,
         user_id=user_id,
     )
-
 
 def securitybeforesending(sendto, user_id, adjusted_amount):
     """
@@ -80,12 +73,10 @@ def sendcoin(user_id, sendto, amount, comment):
     timestamp = datetime.utcnow()
 
     # get the fee from db
-    getwallet = db.session.query(BchWalletFee).filter_by(id=1).first()
+    getwallet = db.session.query(Bch_WalletFee).filter_by(id=1).first()
     walletfee = getwallet.btc
-
     # get the users wall
-    userswallet = db.session.query(BchWallet).filter_by(user_id=user_id).first()
-
+    userswallet = db.session.query(Bch_Wallet).filter_by(user_id=user_id).first()
     # proceed to see if balances check
     curbal = floating_decimals(userswallet.currentbalance, 8)
     amounttomod = floating_decimals(amount, 8)
@@ -102,7 +93,6 @@ def sendcoin(user_id, sendto, amount, comment):
                                          adjusted_amount=adjusted_amount
                                          )
     if securetosend is True:
-
         # send call to rpc
         cmdsendcoin = sendcoincall(address=str(sendto_str),
                                    amount=str(final_amount_str),
@@ -117,7 +107,7 @@ def sendcoin(user_id, sendto, amount, comment):
         txid = cmdsendcoin['result']
 
         # adds to transactions with txid and confirmed = 0 so we can watch it
-        trans = TransactionsBch(
+        trans = Bch_WalletTransactions(
             category=2,
             user_id=user_id,
             confirmations=0,
@@ -149,13 +139,14 @@ def mainquery():
     """
     # main query
     """
-    work = db.session.query(BchWalletWork) \
-        .filter(BchWalletWork.type == 2) \
-        .order_by(BchWalletWork.created.desc()) \
+    # see if any bitcoin work is waiting
+    work = db.session.query(Bch_WalletWork) \
+        .filter(Bch_WalletWork.type == 2) \
+        .order_by(Bch_WalletWork.created.desc()) \
         .all()
     if work:
         for f in work:
-            # off site
+            # send coin off site
             if f.type == 2:
                 sendcoin(user_id=f.user_id,
                          sendto=f.sendto,
@@ -169,7 +160,6 @@ def mainquery():
 
 
 def sendcoincall(address, amount, comment):
-
     # standard json header
     headers = {'content-type': 'application/json'}
 
@@ -192,7 +182,6 @@ def sendcoincall(address, amount, comment):
         data=json.dumps(rpc_input),
         headers=headers,
     )
-
     # the response in json
     response_json = response.json()
 
