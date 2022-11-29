@@ -7,27 +7,6 @@ from app.classes.wallet_bch import \
     Bch_WalletUnconfirmed
 
 
-def accounts_no_address_fix():
-    """
-    Gets all users see if wallet is ok.
-    If not redirects it
-
-    :return:
-    """
-    getusers = db.session.query(Auth_User).all()
-    for f in getusers:
-        userswallet = db.session.query(Bch_Wallet).filter(f.id == Bch_Wallet.user_id).first()
-        if userswallet:
-            if userswallet.address1.startswith('bitcoincash'):
-                pass
-            else:
-                bch_get_address(userswallet)
-        else:
-            bch_create_wallet(user_id=f.user_id)
-
-    print("committed")
-    db.session.commit()
-
 
 def bch_get_address(userswallet):
     """
@@ -39,7 +18,10 @@ def bch_get_address(userswallet):
 
     print(f"user id has no address: {userswallet.user_id}")
     # sets users wallet with this address
-    getnewaddress = db.session.query(Bch_WalletAddresses).filter(Bch_WalletAddresses.status == 0).first()
+    getnewaddress = db.session\
+        .query(Bch_WalletAddresses)\
+        .filter(Bch_WalletAddresses.status == 0)\
+        .first()
     userswallet.address1 = getnewaddress.bchaddress
     userswallet.address1status = 1
     # update address in listing as used
@@ -47,7 +29,6 @@ def bch_get_address(userswallet):
 
     db.session.add(userswallet)
     db.session.add(getnewaddress)
-
 
     print(f"adding an address to the wallet {getnewaddress.bchaddress}")
 
@@ -57,13 +38,18 @@ def bch_create_wallet(user_id):
     :param user_id:
     :return:
     """
-    getnewaddress = db.session.query(Bch_WalletAddresses).filter(Bch_WalletAddresses.status == 0).first()
+
+    getnewaddress = db.session\
+        .query(Bch_WalletAddresses)\
+        .filter(Bch_WalletAddresses.status == 0)\
+        .first()
 
     # if user has no wallet in database
     # create it and give it an address
 
     print(f"user id has no address OR WALLET..failure somewhere! {user_id}")
     print("fixing problem")
+
     # create a new wallet
     btc_cash_walletcreate = Bch_Wallet(user_id=user_id,
                                       currentbalance=0,
@@ -99,6 +85,41 @@ def bch_create_wallet(user_id):
 
 
     print(f"created wallet: {getnewaddress.bchaddress}")
+def main():
+    """
+    Gets all users see if wallet is ok.
+    If not redirects it
+
+    :return:
+    """
+    getusers = db.session\
+        .query(Auth_User)\
+        .all()
+    amount = 0
+    for f in getusers:
+        userswallet = db.session\
+            .query(Bch_Wallet)\
+            .filter(f.id == Bch_Wallet.user_id)\
+            .first()
+        # if wallet doesnt exist
+        if not userswallet:
+            # create a wallet
+            bch_create_wallet(user_id=f.user_id)
+        else:
+            # if wallet starts with bitcoincash do nothing
+            if userswallet.address1.startswith('bitcoincash'):
+                pass
+            else:
+                # get address
+                bch_get_address(userswallet)
+
+                # add counter for commit
+                newamount = amount =+ 1
+                amount = amount + newamount
+
+    if amount > 0:
+        db.session.commit()
+
 
 if __name__ == '__main__':
-    accounts_no_address_fix()
+    main()

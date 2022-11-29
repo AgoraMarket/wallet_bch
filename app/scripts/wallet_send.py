@@ -14,7 +14,11 @@ from app.notification import \
 from app.common.functions import \
     floating_decimals
 
-from app.classes.wallet_bch import Bch_Wallet, Bch_WalletTransactions, Bch_WalletFee, Bch_WalletWork
+from app.classes.wallet_bch import\
+    Bch_Wallet,\
+    Bch_WalletTransactions,\
+    Bch_WalletFee,\
+    Bch_WalletWork
 
 def sendnotification(user_id, notetype):
     """
@@ -73,10 +77,16 @@ def sendcoin(user_id, sendto, amount, comment):
     timestamp = datetime.utcnow()
 
     # get the fee from db
-    getwallet = db.session.query(Bch_WalletFee).filter_by(id=1).first()
+    getwallet = db.session\
+        .query(Bch_WalletFee)\
+        .filter_by(id=1)\
+        .first()
     walletfee = getwallet.btc
     # get the users wall
-    userswallet = db.session.query(Bch_Wallet).filter_by(user_id=user_id).first()
+    userswallet = db.session\
+        .query(Bch_Wallet)\
+        .filter_by(user_id=user_id)\
+        .first()
     # proceed to see if balances check
     curbal = floating_decimals(userswallet.currentbalance, 8)
     amounttomod = floating_decimals(amount, 8)
@@ -135,29 +145,6 @@ def sendcoin(user_id, sendto, amount, comment):
         sendnotification(user_id, notetype=200)
 
 
-def mainquery():
-    """
-    # main query
-    """
-    # see if any bitcoin work is waiting
-    work = db.session.query(Bch_WalletWork) \
-        .filter(Bch_WalletWork.type == 2) \
-        .order_by(Bch_WalletWork.created.desc()) \
-        .all()
-    if work:
-        for f in work:
-            # send coin off site
-            if f.type == 2:
-                sendcoin(user_id=f.user_id,
-                         sendto=f.sendto,
-                         amount=f.amount,
-                         comment=f.txtcomment)
-                f.type = 0
-
-        db.session.commit()
-    else:
-        print("no wallet work")
-
 
 def sendcoincall(address, amount, comment):
     # standard json header
@@ -187,6 +174,30 @@ def sendcoincall(address, amount, comment):
 
     return response_json
 
+def main():
+    """
+    # main query
+    """
+    # see if any bitcoin work is waiting
+    work = db.session\
+        .query(Bch_WalletWork) \
+        .filter(Bch_WalletWork.type == 2) \
+        .order_by(Bch_WalletWork.created.desc()) \
+        .all()
+    if work:
+        for f in work:
+            # send coin off site
+            if f.type == 2:
+                sendcoin(user_id=f.user_id,
+                         sendto=f.sendto,
+                         amount=f.amount,
+                         comment=f.txtcomment)
+                f.type = 0
+
+        db.session.commit()
+    else:
+        print("no wallet work")
+
 
 if __name__ == '__main__':
-    mainquery()
+    main()

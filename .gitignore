@@ -136,3 +136,4 @@ dmypy.json
 /config.py
 /crons.txt
 /backupwallet.py
+/rsync.txt

@@ -33,7 +33,8 @@ def addtounconfirmed(amount, user_id, txid):
     """
 
     # get unconfirmed transactions
-    unconfirmedtable = db.session.query(Bch_WalletUnconfirmed)\
+    unconfirmedtable = db.session\
+        .query(Bch_WalletUnconfirmed)\
         .filter_by(user_id=user_id)\
         .first()
 
@@ -129,7 +130,8 @@ def getbalanceunconfirmed(user_id):
     """
     this function removes the amount from unconfirmed
     """
-    unconfirmeddelete = db.session.query(Bch_WalletUnconfirmed)\
+    unconfirmeddelete = db.session\
+        .query(Bch_WalletUnconfirmed)\
         .filter_by(user_id=user_id)\
         .first()
     a = Decimal(unconfirmeddelete.unconfirmed1)
@@ -140,7 +142,8 @@ def getbalanceunconfirmed(user_id):
 
     total = a + b + c + d + e
 
-    wallet = db.session.query(Bch_Wallet)\
+    wallet = db.session\
+        .query(Bch_Wallet)\
         .filter_by(user_id=user_id)\
         .first()
         
@@ -153,13 +156,14 @@ def orphan(txid, amount2, address):
     """
     this function is if they cant find a matching address
     """
-    getorphan = db.session.query(Bch_WalletTransferOrphan)\
+    getorphan = db.session\
+        .query(Bch_WalletTransferOrphan)\
         .filter_by(txid=txid)\
         .first()
     if getorphan:
         pass
     else:
-        # orphan transaction..put in background.
+        # orphan transaction. put in background.
         # they prolly sent to old address
         trans = Bch_WalletTransferOrphan(
             bch=amount2,
@@ -226,7 +230,7 @@ def updateincomming(howmanyconfs, transactions, userwallet, txid, amount2):
     if transactions.confirmed == 1:
         pass
     else:
-        # if confirmations less than 12..update them ..else
+        # if confirmations less than 12 .update them .else
         # check to see if in table and delete
         if 0 <= howmanyconfs <= 5:
 
@@ -287,68 +291,6 @@ def sendnotification(user_id, notetype):
     )
 
 
-def addcoin():
-    # get the json response
-    response_json = getincommingcoin()
-
-    # this is a complicated response
-    # turns array of json object
-
-    # turns array of json object
-    for i in (response_json['result']):
-
-        address = i['address']
-        print(("address: ", i['address']))
-        amount = i['amount']
-        print(("amount: ", i['amount']))
-        txid = i['txid']
-        print(("txid: ", i['txid']))
-        confirmations = i['confirmations']
-        print(("confirmations: ", i['confirmations']))
-        print("*"*10)
-
-        # get the decimal of amount
-        amount2 = floating_decimals(amount, 8)
-
-        # get confirmations
-        howmanyconfs = int(confirmations)
-
-        # find the wallet that matches the address
-        userwallets = db.session.query(Bch_Wallet) \
-            .filter(or_(Bch_Wallet.address1 == address,
-                        Bch_Wallet.address2 == address,
-                        Bch_Wallet.address3 == address
-                        )
-                    ) \
-            .first()
-
-        # if wallet exists else oprphan
-        if userwallets:
-
-            # get the transactions
-            transactions = db.session.query(Bch_WalletTransactions)\
-                .filter(Bch_WalletTransactions.txid == txid)\
-                .first()
-
-            # create in database a new transaction or watch it
-            if transactions:
-
-                # update if there is a transaction
-                updateincomming(howmanyconfs,
-                                transactions,
-                                userwallets,
-                                txid,
-                                amount2)
-            else:
-
-                # create a transaction
-                newincomming(userwallets, amount2, txid, howmanyconfs)
-
-        # no address found..orphan
-        else:
-            orphan(txid=txid, amount2=amount2, address=address)
-
-        db.session.commit()
 
 
 def getincommingcoin():
@@ -379,6 +321,70 @@ def getincommingcoin():
     print(response_json)
     return response_json
 
+def main():
+    # get the json response
+    response_json = getincommingcoin()
+
+    # this is a complicated response
+    # turns array of json object
+
+    # turns array of json object
+
+    amount_added = 0
+
+    for i in (response_json['result']):
+
+        address = i['address']
+        print(("address: ", i['address']))
+        amount = i['amount']
+        print(("amount: ", i['amount']))
+        txid = i['txid']
+        print(("txid: ", i['txid']))
+        confirmations = i['confirmations']
+        print(("confirmations: ", i['confirmations']))
+        print("*"*10)
+
+        # get the decimal of amount
+        amount2 = floating_decimals(amount, 8)
+
+        # get confirmations
+        howmanyconfs = int(confirmations)
+
+        # find the wallet that matches the address
+        userwallets = db.session\
+            .query(Bch_Wallet) \
+            .filter(or_(Bch_Wallet.address1 == address,
+                        Bch_Wallet.address2 == address,
+                        Bch_Wallet.address3 == address
+                        )
+                    ) \
+            .first()
+
+        # if wallet doesnt exist oprphan
+        if not userwallets:
+            orphan(txid=txid, amount2=amount2, address=address)
+        else:
+            # get the transactions
+            transactions = db.session\
+                .query(Bch_WalletTransactions)\
+                .filter(Bch_WalletTransactions.txid == txid)\
+                .first()
+            newamount = amount_added + 1
+            amount_added = newamount
+            # create in database a new transaction or watch it
+            if transactions:
+                # update if there is a transaction
+                updateincomming(howmanyconfs,
+                                transactions,
+                                userwallets,
+                                txid,
+                                amount2)
+            else:
+                # create a transaction
+                newincomming(userwallets, amount2, txid, howmanyconfs)
+
+
+    db.session.commit()
 
 if __name__ == '__main__':
-    addcoin()
+    main()
