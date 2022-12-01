@@ -1,6 +1,5 @@
 from app import db
 from decimal import Decimal
-
 from app.classes.wallet_bch import Bch_Wallet
 
 def bch_check_balance(user_id, amount):

@@ -5,7 +5,8 @@ from app.classes.wallet_bch import Bch_WalletWork
 # run once every day
 def main():
     """
-    See if any thing int he database is completed and destroy it.  Keep records for a month
+    See if any thing int he database is completed and destroy it. 
+    Keep records for a month
     """
     getwork = db.session\
         .query(Bch_WalletWork)\

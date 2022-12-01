@@ -5,3 +5,6 @@ psycopg2-binary
 requests
 flask
 flask-login
+flask_marshmallow
+flask_session
+marshmallow-sqlalchemy

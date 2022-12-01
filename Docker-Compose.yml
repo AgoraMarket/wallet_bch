@@ -1,26 +1,26 @@
 version: '3.8'
 
-volumes:
-  freeport_bch_wallet_volume:
-  freeport_bch_volume:
-  db:
-    driver: local
 
 networks:
   freeport:
     external: true
-
-  api:
+services:
+  bchwallet:
     container_name: freeport-bch
     image: freeport/freeport-bch
     restart: on-failure
     build:
         context: ./
-        dockerfile: Dockerfile
+        dockerfile: ./Dockerfile
     volumes:
         - ./:/app
         - freeport_wallet_bch:/home/droid/freeport/data
     ports:
-      - '6010:6010'
+      - '5085:5085'
     networks:
       - freeport
+volumes:
+
+  freeport_wallet_bch:
+  db:
+    driver: local
