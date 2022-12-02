@@ -17,7 +17,7 @@ def get_wallet_status():
     """
 
     return jsonify({
-        "wallet_status": 'Bitcoin is Online',
+        "wallet_status": 'Bitcoin RPC is Online',
     })
 
 @app.route('/deletework', methods=['GET'])
@@ -27,7 +27,7 @@ def delete_work():
     :return:
     """
     
-    wallet_deletewalletwork()
+    wallet_deletewalletwork.main()
     
     return jsonify({
         "status": 'Deleted Work',
@@ -40,7 +40,7 @@ def generate_addresses():
     :return:
     """
     
-    wallet_generateaddresses()
+    wallet_generateaddresses.main()
     
     return jsonify({
         "status": 'Generated Addresses',
@@ -54,7 +54,7 @@ def send_coin():
     :return:
     """
     
-    wallet_send()
+    wallet_send.main()
     
     return jsonify({
         "status": 'sent coin',
@@ -66,7 +66,7 @@ def recieve_coin():
      This will activiate the script to check for incomming bitcoin
     :return:
     """
-    wallet_checkincomming()
+    wallet_checkincomming.main()
     
     return jsonify({
         "status": 'sent coin',
@@ -80,7 +80,7 @@ def check_accounts():
     :return:
     """
     
-    account_checker()
+    account_checker.main()
     
     return jsonify({
         "status": 'Checked Accounts',

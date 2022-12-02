@@ -1,11 +1,11 @@
 # coding=utf-8
 from app import app
 
-PORT = 5075
+use_reloader = True
+PORT = 5080
 HOST = '0.0.0.0'
+
 if __name__ == '__main__':
-        app.run(
-                host=HOST,
+        app.run(host=HOST,
                 port=PORT,
-                threaded=True
-        )
+                use_reloader=True)

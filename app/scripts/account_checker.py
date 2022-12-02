@@ -121,5 +121,3 @@ def main():
         db.session.commit()
 
 
-if __name__ == '__main__':
-    main()

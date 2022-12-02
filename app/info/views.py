@@ -8,7 +8,7 @@ from app.info import info
 @info.route('/status', methods=['GET'])
 def vendor_topbar_get_issues_count():
     """
-    Gets the count of vendor order issues.  Notification bar at top
+    Gets status of wallet info
     :return:
     """
     return jsonify({

@@ -1,3 +1,4 @@
+
 class ApplicationConfig:
     CURRENT_SETTINGS = 'LOCAL'
     # databases info

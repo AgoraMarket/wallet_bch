@@ -198,6 +198,3 @@ def main():
     else:
         print("no wallet work")
 
-
-if __name__ == '__main__':
-    main()
