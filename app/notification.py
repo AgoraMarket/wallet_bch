@@ -15,6 +15,5 @@ def notification(thetypeofnote, user_id):
                             post_id=0,
                             comment_id=0,
                             msg_type=thetypeofnote
-
                              )
     db.session.add(addnotice)

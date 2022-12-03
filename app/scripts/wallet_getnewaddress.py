@@ -21,7 +21,8 @@ def getnewaddress(user_id):
         .filter(Bch_WalletAddresses.status == 0) \
         .first()
 
-    # Test to see if user doesn't have any current incomming transactions..get new one if not
+    # Test to see if user doesn't have any current 
+    # incomming transactions..get new one if not
     incdeposit = db.session\
         .query(Bch_WalletTransactions) \
         .filter(Bch_WalletTransactions.category == 3,
