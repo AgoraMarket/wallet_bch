@@ -2,7 +2,7 @@
 from app import db
 import requests
 import json
-from walletconfig import url
+from app import url
 from app.classes.wallet_bch import Bch_WalletAddresses
 
 

@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 
 class ApplicationConfig:
     CURRENT_SETTINGS = 'LOCAL'
@@ -13,3 +15,15 @@ class ApplicationConfig:
     SQLALCHEMY_BINDS = {'clearnet': SQLALCHEMY_DATABASE_URI_0}
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+
+    DIGITAL_CURRENCY = 2
+
+    MINCONF = str(6)
+    MIN_AMOUNT = Decimal(0.00000001)
+    MAX_AMOUNT = Decimal(0.5)
+
+    RPC_USERNAME = 'droid'
+    RPC_PASSWORD = '!Julie774'
+
+    URL = "http://droid:julie774@127.0.0.1:8332/"

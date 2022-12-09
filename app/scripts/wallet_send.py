@@ -1,6 +1,6 @@
 import requests
 import json
-from walletconfig import\
+from app import\
     url,\
     digital_currency,\
     minamount, \

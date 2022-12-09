@@ -6,7 +6,7 @@ from sqlalchemy import or_
 
 from app import db
 
-from walletconfig import url, digital_currency
+from app import url, digital_currency
 
 from app.common.functions import floating_decimals
 from app.notification import notification

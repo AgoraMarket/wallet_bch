@@ -33,6 +33,16 @@ class DecimalEncoder(json.JSONEncoder):
         if isinstance(o, decimal.Decimal):
             return float(o)
         return super(DecimalEncoder, self).default(o)
+    
+
+    
+digital_currency = ApplicationConfig.DIGITAL_CURRENCY
+minconf = ApplicationConfig.MINCONF
+minamount = ApplicationConfig.MIN_AMOUNT
+maxamount = ApplicationConfig.MAX_AMOUNT
+rpcusername = ApplicationConfig.RPC_USERNAME
+rpcpassword = ApplicationConfig.RPC_PASSWORD
+url = ApplicationConfig.URL
 
 
 app.url_map.converters['regex'] = RegexConverter
