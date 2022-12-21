@@ -5,11 +5,12 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+*.idea
 # C extensions
 *.so
-
+./idea
 # Distribution / packaging
+*.iml
 .Python
 build/
 develop-eggs/
@@ -139,3 +140,4 @@ instance/cronts.txt
 /crons.txt
 /backupwallet.py
 /rsync.txt
+.idea/wallet_bch.iml
