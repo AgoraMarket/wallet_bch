@@ -136,8 +136,8 @@ instance/walletconfig.py
 instance/cronts.txt
 /passwords.py
 
-/config.py
 /crons.txt
 /backupwallet.py
 /rsync.txt
 .idea/wallet_bch.iml
+/settings_production.py
