@@ -16,9 +16,6 @@ app = Flask(__name__)
 app.config.from_object(ApplicationConfig)
 session = sessionmaker()
 
-check_enviroment = ApplicationConfig.CURRENT_SETTINGS
-print(f"starting server with {check_enviroment} settings")
-
 
 
 class RegexConverter(BaseConverter):
@@ -49,7 +46,7 @@ app.json_encoder = DecimalEncoder
 
 
 
-session.configure(bind=ApplicationConfig.SQLALCHEMY_DATABASE_URI_0)
+session.configure(bind=ApplicationConfig.SQLALCHEMY_DATABASE_URI)
 db = SQLAlchemy(app)
 server_session = Session(app)
 ma = Marshmallow(app)
