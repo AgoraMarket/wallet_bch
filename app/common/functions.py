@@ -1,6 +1,5 @@
 from decimal import Decimal
 
-
 def floating_decimals(f_val, dec):
     prc = "{:."+str(dec)+"f}"
 

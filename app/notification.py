@@ -1,19 +1,18 @@
-from app import db
-from app.classes.message import Notification_Notifications
-import datetime
 
 
-def notification(thetypeofnote, user_id):
-    now = datetime.datetime.utcnow()
+def notification(username, user_uuid, msg):
+    from app import db
+    from app.classes.notifications import Notification_Notifications
+    from datetime import datetime
+
+
+    now = datetime.utcnow()
+
     addnotice = Notification_Notifications(
-                            created=now,
-                            read=0,
-                            user_id=user_id,
-                            user_name='',
-                            subcommon_id=0,
-                            subcommon_name=0,
-                            post_id=0,
-                            comment_id=0,
-                            msg_type=thetypeofnote
-                             )
+        username=username,
+        user_uuid=user_uuid,
+        timestamp=now,
+        message=msg,
+        read=1
+    )
     db.session.add(addnotice)

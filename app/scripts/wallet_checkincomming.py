@@ -17,7 +17,7 @@ from app.classes.wallet_bch import \
     Bch_WalletTransferOrphan, \
     Bch_WalletTransactions
 
-
+from app.classes.auth import Auth_User
 # this script nonstop.
 # This cron job gets the user unconfirmed.
 # It searches for incomming transactions.
@@ -173,7 +173,7 @@ def orphan(txid, amount2, address):
         db.session.add(trans)
 
 
-def newincomming(userwallet, amount2, txid, howmanyconfs):
+def newincomming(user, userwallet, amount2, txid, howmanyconfs):
     """
     this function creates a new transaction for incomming coin
     """
@@ -223,10 +223,13 @@ def newincomming(userwallet, amount2, txid, howmanyconfs):
     getbalanceunconfirmed(userwallet.user_id)
 
     # notify user
-    sendnotification(user_id=userwallet.user_id, notetype=205)
+    notification(username=user.display_name,
+                 user_uuid=user.uuid,
+                 msg="You have a new incomment BCH deposit.")
 
 
-def updateincomming(howmanyconfs, transactions, userwallet, txid, amount2):
+
+def updateincomming(user, howmanyconfs, transactions, userwallet, txid, amount2):
     if transactions.confirmed == 1:
         pass
     else:
@@ -270,25 +273,6 @@ def updateincomming(howmanyconfs, transactions, userwallet, txid, amount2):
 
         else:
             pass
-
-
-def sendnotification(user_id, notetype):
-    """
-    # This function send notifications
-    """
-    # Positive
-    # 0 =  wallet sent
-
-    # errors
-    # 200 =  too litte or too much at withdrawl
-    # 202 = wallet error
-    # 203 = btc address error
-
-    # btc address error
-    notification(
-        thetypeofnote=notetype,
-        user_id=user_id,
-    )
 
 
 
@@ -359,7 +343,10 @@ def main():
                         )
                     ) \
             .first()
-
+        user = db.session\
+            .query(Auth_User)\
+            .filter(Auth_User.id==userwallets.user_id)\
+            .first()
         # if wallet doesnt exist oprphan
         if not userwallets:
             orphan(txid=txid, amount2=amount2, address=address)
@@ -374,14 +361,20 @@ def main():
             # create in database a new transaction or watch it
             if transactions:
                 # update if there is a transaction
-                updateincomming(howmanyconfs,
+                updateincomming(user,
+                                howmanyconfs,
                                 transactions,
                                 userwallets,
                                 txid,
                                 amount2)
             else:
                 # create a transaction
-                newincomming(userwallets, amount2, txid, howmanyconfs)
+                newincomming(
+                    user,
+                    userwallets,
+                    amount2,
+                    txid,
+                    howmanyconfs)
 
 
     db.session.commit()

@@ -47,23 +47,18 @@ def main():
     else:
         # make 100 new addresses
         for f in range(10):
-
             # call the rpc
             newwalletaddress = callforaddress()
-
             # if error isnt present
             if newwalletaddress["result"].startswith('bitcoincash'):
                 # get the new address
                 the_address = newwalletaddress["result"]
-
                 # add to db addresses
                 walletadd = Bch_WalletAddresses(
-                    bchaddress=the_address,
-                    status=0,
-                )
-
+                                bchaddress=the_address,
+                                status=0,
+                            )
                 db.session.add(walletadd)
-
         db.session.commit()
 
 

@@ -7,36 +7,19 @@ from app import\
     maxamount
 from decimal import Decimal
 from datetime import datetime
-
 from app import db
 from app.notification import \
     notification
 from app.common.functions import \
     floating_decimals
-
 from app.classes.wallet_bch import\
     Bch_Wallet,\
     Bch_WalletTransactions,\
     Bch_WalletFee,\
     Bch_WalletWork
+from app.classes.auth import Auth_User
 
-def sendnotification(user_id, notetype):
-    """
-    # This function send notifications
-    """
-    # Positive
-    # 0 =  wallet sent
-    # errors
-    # 100 =  too litte or too much at withdrawl
-    # 102 = wallet error
-    # 103 = btc address error
-    # btc address error
-    notification(
-        thetypeofnote=notetype,
-        user_id=user_id,
-    )
-
-def securitybeforesending(sendto, user_id, adjusted_amount):
+def securitybeforesending(sendto, user, adjusted_amount):
     """
     # This function checks regex, amounts, and length of addrss
     """
@@ -48,14 +31,18 @@ def securitybeforesending(sendto, user_id, adjusted_amount):
         lengthofaddress = 1
     else:
         lengthofaddress = 0
-        sendnotification(user_id, notetype=203)
+        notification(username=user.display_name,
+                     user_uuid=user.uuid,
+                     msg="Incorrect address for destination")
 
     # test to see if amount when adjusted is not too little or too much
     if Decimal(minamount) <= Decimal(adjusted_amount) <= Decimal(maxamount):
         amountcheck = 1
     else:
         amountcheck = 0
-        sendnotification(user_id, notetype=200)
+        notification(username=user.display_name,
+                     user_uuid=user.uuid,
+                     msg="Security didnt not allow sending coin")
 
     # count amount to pass
     totalamounttopass = regexpasses + lengthofaddress + amountcheck
@@ -67,7 +54,7 @@ def securitybeforesending(sendto, user_id, adjusted_amount):
     return itpasses
 
 
-def sendcoin(user_id, sendto, amount, comment):
+def sendcoin(user, sendto, amount, comment):
     """
     # This function sends the coin off site
     """
@@ -85,7 +72,7 @@ def sendcoin(user_id, sendto, amount, comment):
     # get the users wall
     userswallet = db.session\
         .query(Bch_Wallet)\
-        .filter_by(user_id=user_id)\
+        .filter_by(user_id=user.id)\
         .first()
     # proceed to see if balances check
     curbal = floating_decimals(userswallet.currentbalance, 8)
@@ -99,10 +86,14 @@ def sendcoin(user_id, sendto, amount, comment):
 
     # double check user
     securetosend = securitybeforesending(sendto=sendto,
-                                         user_id=user_id,
+                                         user_id=user.id,
                                          adjusted_amount=adjusted_amount
                                          )
-    if securetosend is True:
+    if securetosend is False:
+        notification(username=user.display_name,
+                     user_uuid=user.uuid,
+                     msg="Security or amount did not allow sending")
+    else:
         # send call to rpc
         cmdsendcoin = sendcoincall(address=str(sendto_str),
                                    amount=str(final_amount_str),
@@ -110,7 +101,6 @@ def sendcoin(user_id, sendto, amount, comment):
                                    )
 
         print("sending a transaction..")
-        print(user_id)
         print("txid: ", cmdsendcoin['result'])
 
         print("*"*15)
@@ -119,7 +109,7 @@ def sendcoin(user_id, sendto, amount, comment):
         # adds to transactions with txid and confirmed = 0 so we can watch it
         trans = Bch_WalletTransactions(
             category=2,
-            user_id=user_id,
+            user_id=user.id,
             confirmations=0,
             txid=txid,
             blockhash='',
@@ -137,12 +127,13 @@ def sendcoin(user_id, sendto, amount, comment):
             digital_currency=dcurrency
         )
 
-        sendnotification(user_id, notetype=204)
+        notification(username=user.display_name,
+                     user_uuid=user.uuid,
+                     msg="Coin has been successfully sent to destination.")
 
         db.session.add(userswallet)
         db.session.add(trans)
-    else:
-        sendnotification(user_id, notetype=200)
+
 
 
 
@@ -184,11 +175,16 @@ def main():
         .filter(Bch_WalletWork.type == 2) \
         .order_by(Bch_WalletWork.created.desc()) \
         .all()
+
     if work:
         for f in work:
             # send coin off site
             if f.type == 2:
-                sendcoin(user_id=f.user_id,
+                user = db.session\
+                    .query(Auth_User)\
+                    .filter(Auth_User.id==f.user_id)\
+                    .first()
+                sendcoin(user=user,
                          sendto=f.sendto,
                          amount=f.amount,
                          comment=f.txtcomment)
