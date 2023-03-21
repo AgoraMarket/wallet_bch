@@ -8,8 +8,7 @@ from app import\
 from decimal import Decimal
 from datetime import datetime
 from app import db
-from app.notification import \
-    notification
+from app import create_notification
 from app.common.functions import \
     floating_decimals
 from app.classes.wallet_bch import\
@@ -18,6 +17,7 @@ from app.classes.wallet_bch import\
     Bch_WalletFee,\
     Bch_WalletWork
 from app.classes.auth import Auth_User
+
 
 def securitybeforesending(sendto, user, adjusted_amount):
     """
@@ -31,7 +31,7 @@ def securitybeforesending(sendto, user, adjusted_amount):
         lengthofaddress = 1
     else:
         lengthofaddress = 0
-        notification(username=user.display_name,
+        create_notification(username=user.display_name,
                      user_uuid=user.uuid,
                      msg="Incorrect address for destination")
 
@@ -40,7 +40,7 @@ def securitybeforesending(sendto, user, adjusted_amount):
         amountcheck = 1
     else:
         amountcheck = 0
-        notification(username=user.display_name,
+        create_notification(username=user.display_name,
                      user_uuid=user.uuid,
                      msg="Security didnt not allow sending coin")
 
@@ -86,11 +86,11 @@ def sendcoin(user, sendto, amount, comment):
 
     # double check user
     securetosend = securitybeforesending(sendto=sendto,
-                                         user_id=user.id,
+                                         user=user.id,
                                          adjusted_amount=adjusted_amount
                                          )
     if securetosend is False:
-        notification(username=user.display_name,
+        create_notification(username=user.display_name,
                      user_uuid=user.uuid,
                      msg="Security or amount did not allow sending")
     else:
@@ -127,7 +127,7 @@ def sendcoin(user, sendto, amount, comment):
             digital_currency=dcurrency
         )
 
-        notification(username=user.display_name,
+        create_notification(username=user.display_name,
                      user_uuid=user.uuid,
                      msg="Coin has been successfully sent to destination.")
 

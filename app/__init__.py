@@ -14,7 +14,6 @@ app.config.from_object(ApplicationConfig)
 session = sessionmaker()
 
 
-
 class RegexConverter(BaseConverter):
     def __init__(self, url_map, *items):
         super(RegexConverter, self).__init__(url_map)

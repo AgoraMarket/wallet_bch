@@ -3,25 +3,22 @@ import json
 from decimal import Decimal
 import requests
 from sqlalchemy import or_
-
 from app import db
-
 from app import url, digital_currency
-
 from app.common.functions import floating_decimals
-from app.notification import notification
-
+from app.common.notification import create_notification
 from app.classes.wallet_bch import \
     Bch_Wallet, \
     Bch_WalletUnconfirmed, \
     Bch_WalletTransferOrphan, \
     Bch_WalletTransactions
-
 from app.classes.auth import Auth_User
+
+"""
 # this script nonstop.
 # This cron job gets the user unconfirmed.
 # It searches for incomming transactions.
-
+"""
 
 def addtounconfirmed(amount, user_id, txid):
     """
@@ -223,13 +220,13 @@ def newincomming(user, userwallet, amount2, txid, howmanyconfs):
     getbalanceunconfirmed(userwallet.user_id)
 
     # notify user
-    notification(username=user.display_name,
+    create_notification(username=user.display_name,
                  user_uuid=user.uuid,
                  msg="You have a new incomment BCH deposit.")
 
 
 
-def updateincomming(user, howmanyconfs, transactions, userwallet, txid, amount2):
+def updateincomming(howmanyconfs, transactions, userwallet, txid, amount2):
     if transactions.confirmed == 1:
         pass
     else:
@@ -361,7 +358,7 @@ def main():
             # create in database a new transaction or watch it
             if transactions:
                 # update if there is a transaction
-                updateincomming(user,
+                updateincomming(
                                 howmanyconfs,
                                 transactions,
                                 userwallets,

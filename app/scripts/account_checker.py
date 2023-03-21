@@ -7,7 +7,6 @@ from app.classes.wallet_bch import \
     Bch_WalletUnconfirmed
 
 
-
 def bch_get_address(userswallet):
     """
     if user has a wallet but no address

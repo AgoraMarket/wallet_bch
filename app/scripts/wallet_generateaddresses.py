@@ -6,7 +6,6 @@ from app import url
 from app.classes.wallet_bch import Bch_WalletAddresses
 
 
-
 def callforaddress():
 
     # standard json header

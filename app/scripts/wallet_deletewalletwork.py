@@ -1,8 +1,9 @@
 from app import db
 from app.classes.wallet_bch import Bch_WalletWork
-
-
+"""
 # run once every day
+"""
+
 def main():
     """
     See if any thing int he database is completed and destroy it. 
