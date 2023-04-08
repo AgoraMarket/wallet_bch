@@ -8,7 +8,7 @@ from app import\
 from decimal import Decimal
 from datetime import datetime
 from app import db
-from app import create_notification
+from app.common.notification import create_notification
 from app.common.functions import \
     floating_decimals
 from app.classes.wallet_bch import\
